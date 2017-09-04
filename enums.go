@@ -37,7 +37,7 @@ const (
     Action_WriteAcknowledgement = "WA"
 )
 func isActionValid(value string) bool {
-    for _, t := range []Action{Action_Error,
+    for _, a := range []Action{Action_Error,
         Action_Ping,
         Action_Pong,
         Action_Ack,
@@ -71,7 +71,7 @@ func isActionValid(value string) bool {
         Action_Query,
         Action_WriteAcknowledgement} {
 
-        if string(t) == value {
+        if string(a) == value {
             return true
         }
     }
@@ -162,3 +162,13 @@ const (
     RecordMergeStrategy_RemoteWins RecordMergeStrategy = "REMOTE_WINS"
     RecordMergeStrategy_LocalWins = "LOCAL_WINS"
 )
+func isRecordMergeStrategyValid(value string) bool {
+    for _, r := range []RecordMergeStrategy{RecordMergeStrategy_RemoteWins,
+        RecordMergeStrategy_LocalWins} {
+
+        if string(r) == value {
+            return true
+        }
+    }
+    return false
+}
