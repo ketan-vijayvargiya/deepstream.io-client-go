@@ -1,6 +1,9 @@
 package deepstreamio
 
-import "github.com/gorilla/websocket"
+import (
+    "github.com/gorilla/websocket"
+    "github.com/Sirupsen/logrus"
+)
 
 type endpoint struct {
     url                 string
@@ -15,6 +18,7 @@ func newEndpoint(url string, connection *connection) *endpoint {
 }
 
 func (e *endpoint) send(msg string) {
+    logrus.WithField("msg", msg).Debug("Sent message")
     go func() {
         var err = e.websocketConn.WriteMessage(websocket.TextMessage, []byte(msg))
         if err != nil {
@@ -50,6 +54,8 @@ func (e *endpoint) open() {
         if err != nil {
             e.connection.onError(err.Error())
         } else {
+            logrus.Debug("Opened endpoint")
+
             conn.SetCloseHandler(e.websocketCloseHandler)
             e.websocketConn = conn
 
@@ -77,8 +83,9 @@ func (e *endpoint) readMessagesInLoop() {
             if err != nil {
                 e.connection.onError(err.Error())
                 return
-            } else if len(rawMsg) > 0 {
-                e.connection.onMessage(string(rawMsg))
+            } else if rawMsgStr := string(rawMsg); len(rawMsgStr) > 0 {
+                logrus.WithField("msg", rawMsgStr).Debug("Read message")
+                e.connection.onMessage(rawMsgStr)
             }            
         }
     }
