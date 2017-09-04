@@ -37,7 +37,7 @@ func parseMessage(message string, client *client) *message {
 }
 
 func convertTyped(value string, client *client) interface{} {
-    switch value[0] {
+    switch Type(value[0]) {
     case Type_String:
         return value[1:]
 
@@ -45,7 +45,7 @@ func convertTyped(value string, client *client) interface{} {
         return nil
 
     case Type_Number:
-        var f, _ = strconv.ParseFloat(value[1:], 64)
+        var f, _ = strconv.ParseFloat(string(value[1:]), 64)
         return f
 
     case Type_True:
@@ -55,7 +55,7 @@ func convertTyped(value string, client *client) interface{} {
         return false
 
     case Type_Object:
-        return parseObject(value[1:])
+        return parseObject(string(value[1:]))
 
     case Type_Undefined:
         return Type_Undefined

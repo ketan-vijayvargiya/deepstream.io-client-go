@@ -36,6 +36,47 @@ const (
     Action_Query = "Q"
     Action_WriteAcknowledgement = "WA"
 )
+func isActionValid(value string) bool {
+    for _, t := range []Action{Action_Error,
+        Action_Ping,
+        Action_Pong,
+        Action_Ack,
+        Action_Redirect,
+        Action_Challenge,
+        Action_ChallengeResponse,
+        Action_Read,
+        Action_Create,
+        Action_CreateOrRead,
+        Action_CreateAndUpdate,
+        Action_Update,
+        Action_Patch,
+        Action_Delete,
+        Action_Subscribe,
+        Action_Unsubscribe,
+        Action_Has,
+        Action_Snapshot,
+        Action_SubscriptionForPatternFound,
+        Action_SubscriptionForPatternRemoved,
+        Action_SubscriptionHasProvider,
+        Action_Listen,
+        Action_Unlisten,
+        Action_ListenAccept,
+        Action_ListenReject,
+        Action_Event,
+        Action_Request,
+        Action_Response,
+        Action_Rejection,
+        Action_PresenceJoin,
+        Action_PresenceLeave,
+        Action_Query,
+        Action_WriteAcknowledgement} {
+
+        if string(t) == value {
+            return true
+        }
+    }
+    return false
+}
 
 type ConnectionState string
 const (
@@ -89,6 +130,21 @@ const (
     Topic_RPC = "P"
     Topic_Presence = "U"
 )
+func isTopicValid(value string) bool {
+    for _, t := range []Topic{Topic_Connection,
+        Topic_Auth,
+        Topic_Error,
+        Topic_Event,
+        Topic_Record,
+        Topic_RPC,
+        Topic_Presence} {
+
+        if string(t) == value {
+            return true
+        }
+    }
+    return false
+}
 
 type Type string
 const (

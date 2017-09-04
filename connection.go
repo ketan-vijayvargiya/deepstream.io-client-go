@@ -15,7 +15,7 @@ type connection struct {
 
     originalUrl                     string
     authParams                      string
-    loginCallback                   LoginCallback
+    loginCallback                   func(loginResult *LoginResult)
     deliberateClose                 bool
     redirecting                     bool
     tooManyAuthAttempts             bool
@@ -44,13 +44,13 @@ func newConnection(url string, clientConfig *ClientConfig, client *client) *conn
     return conn
 }
 
-func (c *connection) authenticate(authParams string, loginCallback LoginCallback) {
+func (c *connection) authenticate(authParams string, loginCallback func(loginResult *LoginResult)) {
     c.loginCallback = loginCallback
     c.authParams = authParams
 
     if c.tooManyAuthAttempts || c.challengeDenied {
         c.client.onError(Topic_Error, Event_IsClosed, "This client's connection was closed")
-        c.loginCallback.LoginFailed(Event_IsClosed, "This client's connection was closed")
+        c.loginCallback(getLoginResultFailure(Event_IsClosed, "This client's connection was closed"))
         return
     }
 
@@ -175,8 +175,8 @@ func (c* connection) handleAuthResponse(message *message) {
         }
 
         if c.loginCallback != nil {
-            c.loginCallback.LoginFailed(Event(message.data[0]),
-                convertTyped(message.data[1], c.client))
+            c.loginCallback(getLoginResultFailure(
+                Event(message.data[0]), convertTyped(message.data[1], c.client)))
         }
 
     case Action_Ack:
@@ -188,7 +188,8 @@ func (c* connection) handleAuthResponse(message *message) {
         }
 
         if c.loginCallback != nil {
-            c.loginCallback.LoginSuccess(convertTyped(message.data[0], c.client))
+            c.loginCallback(getLoginResultSucess(
+                convertTyped(message.data[0], c.client)))
         }
     }
 }
@@ -262,11 +263,4 @@ func (c *connection) tryOpen() {
 func (c *connection) clearReconnect() {
     c.reconnectTimeout = nil
     c.reconnectionAttempt = 0
-}
-
-func min(a, b int) int {
-    if a < b {
-        return a
-    }
-    return b
 }
