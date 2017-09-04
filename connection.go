@@ -110,7 +110,7 @@ func (c *connection) onMessage(rawMessage string) {
     var parsedMessages = parse(rawMessage, c.client)
 
     for _, message := range parsedMessages {
-        switch message.Topic {
+        switch message.topic {
         case Topic_Connection:
             c.handleConnectionResponse(message)
 
@@ -118,7 +118,7 @@ func (c *connection) onMessage(rawMessage string) {
             c.handleAuthResponse(message)
 
         default:
-            c.client.onError(Topic_Error, Event_UnsolicitedMessage, string(message.Action))
+            c.client.onError(Topic_Error, Event_UnsolicitedMessage, string(message.action))
         }
     }
 }
@@ -139,8 +139,8 @@ func (c *connection) onClose() {
     }
 }
 
-func (c* connection) handleConnectionResponse(message *Message) {
-    switch message.Action {
+func (c* connection) handleConnectionResponse(message *message) {
+    switch message.action {
     case Action_Ping:
         c.endpoint.send(getMsg(Topic_Connection, Action_Pong, nil))
 
@@ -156,17 +156,17 @@ func (c* connection) handleConnectionResponse(message *Message) {
         c.close(false)
 
     case Action_Redirect:
-        c.url = message.Data[0]
+        c.url = message.data[0]
         c.redirecting = true
         c.endpoint.close()
         c.endpoint = nil
     }
 }
 
-func (c* connection) handleAuthResponse(message *Message) {
-    switch message.Action {
+func (c* connection) handleAuthResponse(message *message) {
+    switch message.action {
     case Action_Error:
-        if message.Data[0] == string(Event_TooManyAuthAttempts) {
+        if message.data[0] == string(Event_TooManyAuthAttempts) {
             c.deliberateClose = true;
             c.tooManyAuthAttempts = true;
         } else {
@@ -175,8 +175,8 @@ func (c* connection) handleAuthResponse(message *Message) {
         }
 
         if c.loginCallback != nil {
-            c.loginCallback.LoginFailed(Event(message.Data[0]),
-                convertTyped(message.Data[1], c.client))
+            c.loginCallback.LoginFailed(Event(message.data[0]),
+                convertTyped(message.data[1], c.client))
         }
 
     case Action_Ack:
@@ -188,7 +188,7 @@ func (c* connection) handleAuthResponse(message *Message) {
         }
 
         if c.loginCallback != nil {
-            c.loginCallback.LoginSuccess(convertTyped(message.Data[0], c.client))
+            c.loginCallback.LoginSuccess(convertTyped(message.data[0], c.client))
         }
     }
 }
