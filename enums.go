@@ -49,6 +49,12 @@ const (
     ConnectionState_Reconnecting = "RECONNECTING"
 )
 
+type GlobalConnectivityState string
+const (
+    GlobalConnectivityState_Connected GlobalConnectivityState = "CONNECTED"
+    GlobalConnectivityState_Disconnected = "DISCONNECTED"
+)
+
 type Event string
 const (
     Event_UnauthenticatedConnectiontimeout Event = "UNAUTHENTICATED_CONNECTION_TIMEOUT"
