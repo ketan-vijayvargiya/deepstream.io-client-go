@@ -6,8 +6,8 @@ import (
     "encoding/json"
 )
 
-func parse(message string, client *client) []*message {
-    var messages = []*message{}
+func parse(message string, client *client) []*Message {
+    var messages = make([]*Message, 0)
 
     for _, rawMessage := range strings.Split(message, messageRecordSeparator) {
         if parsedMessage := parseMessage(rawMessage, client); parsedMessage != nil {
@@ -18,7 +18,7 @@ func parse(message string, client *client) []*message {
     return messages
 }
 
-func parseMessage(message string, client *client) *message {
+func parseMessage(message string, client *client) *Message {
     var parts = strings.Split(message, messageUnitSeparator)
 
     if len(parts) < 2 {
@@ -33,7 +33,7 @@ func parseMessage(message string, client *client) *message {
         client.onError("", Event_MessageParseError, "Unknown action " + parts[1])
         return nil
     }
-    return &message{topic: Topic(parts[0]), action: Action(parts[1]), data: parts[2:]}
+    return &Message{Topic: Topic(parts[0]), Action: Action(parts[1]), Data: parts[2:]}
 }
 
 func convertTyped(value string, client *client) interface{} {

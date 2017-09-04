@@ -110,7 +110,7 @@ func (c *connection) onMessage(rawMessage string) {
     var parsedMessages = parse(rawMessage, c.client)
 
     for _, message := range parsedMessages {
-        switch message.topic {
+        switch message.Topic {
         case Topic_Connection:
             c.handleConnectionResponse(message)
 
@@ -118,7 +118,7 @@ func (c *connection) onMessage(rawMessage string) {
             c.handleAuthResponse(message)
 
         default:
-            c.client.onError(Topic_Error, Event_UnsolicitedMessage, string(message.action))
+            c.client.onError(Topic_Error, Event_UnsolicitedMessage, string(message.Action))
         }
     }
 }
@@ -139,8 +139,8 @@ func (c *connection) onClose() {
     }
 }
 
-func (c* connection) handleConnectionResponse(message *message) {
-    switch message.action {
+func (c *connection) handleConnectionResponse(message *Message) {
+    switch message.Action {
     case Action_Ping:
         c.endpoint.send(getMsg(Topic_Connection, Action_Pong, nil))
 
@@ -156,17 +156,17 @@ func (c* connection) handleConnectionResponse(message *message) {
         c.close(false)
 
     case Action_Redirect:
-        c.url = message.data[0]
+        c.url = message.Data[0]
         c.redirecting = true
         c.endpoint.close()
         c.endpoint = nil
     }
 }
 
-func (c* connection) handleAuthResponse(message *message) {
-    switch message.action {
+func (c *connection) handleAuthResponse(message *Message) {
+    switch message.Action {
     case Action_Error:
-        if message.data[0] == string(Event_TooManyAuthAttempts) {
+        if message.Data[0] == string(Event_TooManyAuthAttempts) {
             c.deliberateClose = true;
             c.tooManyAuthAttempts = true;
         } else {
@@ -176,7 +176,7 @@ func (c* connection) handleAuthResponse(message *message) {
 
         if c.loginCallback != nil {
             c.loginCallback(getLoginResultFailure(
-                Event(message.data[0]), convertTyped(message.data[1], c.client)))
+                Event(message.Data[0]), convertTyped(message.Data[1], c.client)))
         }
 
     case Action_Ack:
@@ -189,12 +189,12 @@ func (c* connection) handleAuthResponse(message *message) {
 
         if c.loginCallback != nil {
             c.loginCallback(getLoginResultSucess(
-                convertTyped(message.data[0], c.client)))
+                convertTyped(message.Data[0], c.client)))
         }
     }
 }
 
-func (c* connection) setState(connectionState ConnectionState) {
+func (c *connection) setState(connectionState ConnectionState) {
     c.connectionState = connectionState
 
     for _, l := range c.connectionStateListeners {
@@ -206,7 +206,7 @@ func (c* connection) setState(connectionState ConnectionState) {
     }
 }
 
-func (c* connection) setGlobalConnectivityState(globalConnectivityState GlobalConnectivityState) {
+func (c *connection) setGlobalConnectivityState(globalConnectivityState GlobalConnectivityState) {
     c.globalConnectivityState = globalConnectivityState
 
     if globalConnectivityState == GlobalConnectivityState_Connected {

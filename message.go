@@ -5,8 +5,8 @@ const (
     messageRecordSeparator = "\u001e"
 )
 
-type message struct {
-    topic  Topic
-    action Action
-    data   []string
+type Message struct {
+    Topic  Topic
+    Action Action
+    Data   []string
 }
