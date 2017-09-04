@@ -80,9 +80,9 @@ func (c *connection) close(forceClose bool) {
     c.deliberateClose = true
 
     if forceClose && c.endpoint != nil {
-        c.endpoint.forceClose()
+        c.endpoint.close(true)
     } else if c.endpoint != nil {
-        c.endpoint.close()
+        c.endpoint.close(false)
         c.endpoint = nil
     }
 
@@ -158,7 +158,7 @@ func (c *connection) handleConnectionResponse(message *Message) {
     case Action_Redirect:
         c.url = message.Data[0]
         c.redirecting = true
-        c.endpoint.close()
+        c.endpoint.close(false)
         c.endpoint = nil
     }
 }
@@ -220,13 +220,14 @@ func (c *connection) setGlobalConnectivityState(globalConnectivityState GlobalCo
 
         c.reconnectTimeout = nil
         c.reconnectionAttempt = 0
-        c.endpoint.forceClose()
+        c.endpoint.close(true)
         c.setState(ConnectionState_Closed)
     }
 }
 
 func (c *connection) createEndpoint() {
     c.endpoint = newEndpoint(c.url, c)
+    c.endpoint.open()
 }
 
 func (c *connection) tryReconnect() {

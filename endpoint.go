@@ -23,25 +23,22 @@ func (e *endpoint) send(msg string) {
     }()
 }
 
-func (e *endpoint) close() {
+func (e *endpoint) close(forceClose bool) {
     e.isWebsocketClosed <- true
 
     go func() {
-        var err = e.websocketConn.WriteMessage(
-            websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-        if err != nil {
-            e.connection.onError(err.Error())
+        var err error
+        if forceClose {
+            err = e.websocketConn.Close()
+        } else {
+            err = e.websocketConn.WriteMessage(
+                websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
         }
-    }()
-}
 
-func (e *endpoint) forceClose() {
-    e.isWebsocketClosed <- true
-
-    go func() {
-        var err = e.websocketConn.Close()
         if err != nil {
             e.connection.onError(err.Error())
+        } else {
+            e.connection.onClose()
         }
     }()
 }
