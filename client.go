@@ -1,23 +1,12 @@
 package deepstreamio
 
-type Client interface {
-    Login(authParams string) *LoginResult
-    Close()
-    AddConnectionChangeListener(listener ConnectionStateListener)
-    RemoveConnectionChangeListener(listener ConnectionStateListener)
-    GetConnectionState() ConnectionState
-    SetGlobalConnectivityState(state GlobalConnectivityState)
-}
-
-func NewClient(url string, clientConfig *ClientConfig,
-    runtimeErrorHandler func (topic Topic, event Event, errorMessage string)) Client {
+func NewClient(url string, clientConfig *ClientConfig) *Client {
 
     var clonedClientConfig  = clientConfig.cloneWithDefaults()
 
-    var client = &client{
+    var client = &Client{
         url                 : url,
         clientConfig        : clonedClientConfig,
-        runtimeErrorHandler : runtimeErrorHandler,
     }
     client.connection       = newConnection(url, clonedClientConfig, client)
 
@@ -29,11 +18,12 @@ func NewClient(url string, clientConfig *ClientConfig,
     return client
 }
 
-type client struct {
+type Client struct {
     url                 string
     clientConfig        *ClientConfig
     connection          *connection
-    runtimeErrorHandler func (topic Topic, event Event, errorMessage string)
+
+    RuntimeErrorHandler func (topic Topic, event Event, errorMessage string)
 
     EventHandler        *EventHandler
     RpcHandler          *RpcHandler
@@ -41,7 +31,7 @@ type client struct {
     PresenceHandler     *PresenceHandler
 }
 
-func (c *client) Login(authParams string) *LoginResult {
+func (c *Client) Login(authParams string) *LoginResult {
     loginResultChan := make(chan *LoginResult)
     c.connection.authenticate(authParams, func(loginResult *LoginResult) {
         loginResultChan <- loginResult
@@ -50,15 +40,15 @@ func (c *client) Login(authParams string) *LoginResult {
     return <- loginResultChan
 }
 
-func (c *client) Close() {
+func (c *Client) Close() {
     c.connection.close(false)
 }
 
-func (c *client) AddConnectionChangeListener(listener ConnectionStateListener) {
+func (c *Client) AddConnectionChangeListener(listener ConnectionStateListener) {
     c.connection.connectionStateListeners = append(c.connection.connectionStateListeners, listener)
 }
 
-func (c *client) RemoveConnectionChangeListener(listener ConnectionStateListener) {
+func (c *Client) RemoveConnectionChangeListener(listener ConnectionStateListener) {
     var arr = make([]ConnectionStateListener, len(c.connection.connectionStateListeners) - 1)
     for _, l := range c.connection.connectionStateListeners {
         if l != listener {
@@ -68,15 +58,15 @@ func (c *client) RemoveConnectionChangeListener(listener ConnectionStateListener
     c.connection.connectionStateListeners = arr
 }
 
-func (c *client) GetConnectionState() ConnectionState {
+func (c *Client) GetConnectionState() ConnectionState {
     return c.connection.connectionState
 }
 
-func (c *client) SetGlobalConnectivityState(state GlobalConnectivityState) {
+func (c *Client) SetGlobalConnectivityState(state GlobalConnectivityState) {
     c.connection.setGlobalConnectivityState(state)
 }
 
-func (c *client) onError(topic Topic, event Event, msg string) {
+func (c *Client) onError(topic Topic, event Event, msg string) {
     if event == Event_AckTimeout || event == Event_ResponseTimeout {
         if c.connection.connectionState == ConnectionState_AwaitingAuthentication {
             c.onError(Topic_Error, Event_NotAuthenticated,
@@ -85,8 +75,8 @@ func (c *client) onError(topic Topic, event Event, msg string) {
         }
     }
 
-    if c.runtimeErrorHandler != nil {
-        c.runtimeErrorHandler(topic, event, msg)
+    if c.RuntimeErrorHandler != nil {
+        c.RuntimeErrorHandler(topic, event, msg)
     } else {
         panic("Unhandled exception for Topic:" + string(topic) + ", Event:" + string(event) + ", msg:" + msg)
     }

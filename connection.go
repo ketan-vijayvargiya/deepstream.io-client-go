@@ -8,7 +8,7 @@ import (
 type connection struct {
     url                             string
     clientConfig                    *ClientConfig
-    client                          *client
+    client                          *Client
 
     connectionState                 ConnectionState
     globalConnectivityState         GlobalConnectivityState
@@ -27,7 +27,7 @@ type connection struct {
     connectionStateListeners        []ConnectionStateListener
 }
 
-func newConnection(url string, clientConfig *ClientConfig, client *client) *connection {
+func newConnection(url string, clientConfig *ClientConfig, client *Client) *connection {
     var conn = &connection{url: url,
         clientConfig: clientConfig,
         client: client,

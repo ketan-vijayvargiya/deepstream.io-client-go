@@ -6,7 +6,7 @@ import (
     "encoding/json"
 )
 
-func parse(message string, client *client) []*Message {
+func parse(message string, client *Client) []*Message {
     var messages = make([]*Message, 0)
 
     for _, rawMessage := range strings.Split(message, messageRecordSeparator) {
@@ -18,7 +18,7 @@ func parse(message string, client *client) []*Message {
     return messages
 }
 
-func parseMessage(message string, client *client) *Message {
+func parseMessage(message string, client *Client) *Message {
     if len(message) == 0 {
         return nil
     }
@@ -40,7 +40,7 @@ func parseMessage(message string, client *client) *Message {
     return &Message{Topic: Topic(parts[0]), Action: Action(parts[1]), Data: parts[2:]}
 }
 
-func convertTyped(value string, client *client) interface{} {
+func convertTyped(value string, client *Client) interface{} {
     switch Type(value[0]) {
     case Type_String:
         return value[1:]
