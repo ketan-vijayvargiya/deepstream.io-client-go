@@ -19,6 +19,10 @@ func parse(message string, client *client) []*Message {
 }
 
 func parseMessage(message string, client *client) *Message {
+    if len(message) == 0 {
+        return nil
+    }
+
     var parts = strings.Split(message, messageUnitSeparator)
 
     if len(parts) < 2 {

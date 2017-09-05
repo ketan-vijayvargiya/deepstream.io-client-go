@@ -29,7 +29,7 @@ type client struct {
 }
 
 func (c *client) Login(authParams string) *LoginResult {
-    var loginResultChan chan *LoginResult
+    loginResultChan := make(chan *LoginResult)
     c.connection.authenticate(authParams, func(loginResult *LoginResult) {
         loginResultChan <- loginResult
     })
@@ -75,6 +75,6 @@ func (c *client) onError(topic Topic, event Event, msg string) {
     if c.runtimeErrorHandler != nil {
         c.runtimeErrorHandler(topic, event, msg)
     } else {
-        panic("Unhandled exception for Topic:" + topic + ", Event:" + event + ", msg:" + msg)
+        panic("Unhandled exception for Topic:" + string(topic) + ", Event:" + string(event) + ", msg:" + msg)
     }
 }

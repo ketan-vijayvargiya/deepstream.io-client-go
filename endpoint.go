@@ -59,8 +59,8 @@ func (e *endpoint) open() {
             conn.SetCloseHandler(e.websocketCloseHandler)
             e.websocketConn = conn
 
-            go e.readMessagesInLoop()
             e.connection.onOpen()
+            go e.readMessagesInLoop()
         }
     }()
 }
@@ -79,13 +79,15 @@ func (e *endpoint) readMessagesInLoop() {
             return
 
         default:
-            var _, rawMsg, err = e.websocketConn.ReadMessage()
+            var _, bytes, err = e.websocketConn.ReadMessage()
             if err != nil {
                 e.connection.onError(err.Error())
                 return
-            } else if rawMsgStr := string(rawMsg); len(rawMsgStr) > 0 {
-                logrus.WithField("msg", rawMsgStr).Debug("Read message")
-                e.connection.onMessage(rawMsgStr)
+            }
+
+            if rawMsg := string(bytes); len(rawMsg) > 0 {
+                logrus.WithField("msg", rawMsg).Debug("Read message")
+                e.connection.onMessage(rawMsg)
             }            
         }
     }
