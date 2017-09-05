@@ -12,13 +12,21 @@ type Client interface {
 func NewClient(url string, clientConfig *ClientConfig,
     runtimeErrorHandler func (topic Topic, event Event, errorMessage string)) Client {
 
-    var client = client{
-        url:          url,
-        clientConfig: clientConfig.cloneWithDefaults(),
-        runtimeErrorHandler: runtimeErrorHandler,
+    var clonedClientConfig  = clientConfig.cloneWithDefaults()
+
+    var client = &client{
+        url                 : url,
+        clientConfig        : clonedClientConfig,
+        runtimeErrorHandler : runtimeErrorHandler,
     }
-    client.connection = newConnection(url, clientConfig, &client)
-    return &client
+    client.connection       = newConnection(url, clonedClientConfig, client)
+
+    client.EventHandler     = newEventHandler(client, clonedClientConfig)
+    client.RpcHandler       = newRpcHandler(client, clonedClientConfig)
+    client.RecordHandler    = newRecordHandler(client, clonedClientConfig)
+    client.PresenceHandler  = newPresenceHandler(client, clonedClientConfig)
+
+    return client
 }
 
 type client struct {
@@ -26,6 +34,11 @@ type client struct {
     clientConfig        *ClientConfig
     connection          *connection
     runtimeErrorHandler func (topic Topic, event Event, errorMessage string)
+
+    EventHandler        *EventHandler
+    RpcHandler          *RpcHandler
+    RecordHandler       *RecordHandler
+    PresenceHandler     *PresenceHandler
 }
 
 func (c *client) Login(authParams string) *LoginResult {
