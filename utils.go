@@ -1,5 +1,7 @@
 package deepstreamio
 
+import "time"
+
 func min(a, b int) int {
     if a < b {
         return a
@@ -19,4 +21,19 @@ func getStringOrDefault(x, d string) string {
         return d
     }
     return x
+}
+
+func getDurationMillis(t int) time.Duration {
+    return time.Duration(t) * time.Millisecond
+}
+
+func scheduleFuncAfterMillis(f func(), millis int) *time.Timer {
+    d := getDurationMillis(millis)
+    timer := time.NewTimer(d)
+    go func() {
+        <- timer.C
+        f()
+    }()
+
+    return timer
 }
