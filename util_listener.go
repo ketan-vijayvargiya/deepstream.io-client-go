@@ -28,6 +28,7 @@ func (u *utilListener) start() {
 
 func (u *utilListener) destroy() {
     u.connection.sendMsg(u.topic, Action_Unlisten, []string{u.pattern})
+    u.resubscribeNotifier.destroy()
     u.listenerCallback = nil
     u.pattern = ""
     u.client = nil
