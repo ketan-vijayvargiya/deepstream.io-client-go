@@ -198,7 +198,7 @@ func (c *connection) setState(connectionState ConnectionState) {
     c.connectionState = connectionState
 
     for _, l := range c.connectionStateListeners {
-        l.connectionStateChanged(connectionState)
+        l.ConnectionStateChanged(connectionState)
     }
 
     if c.connectionState == ConnectionState_AwaitingAuthentication && c.authParams != "" {
@@ -241,12 +241,7 @@ func (c *connection) tryReconnect() {
 
             var delayTimeMillis = min(c.clientConfig.ReconnectIntervalIncrement * c.reconnectionAttempt,
                 c.clientConfig.MaxReconnectInterval)
-            c.reconnectTimeout = time.NewTimer(time.Duration(delayTimeMillis) * time.Millisecond)
-            go func() {
-                <-c.reconnectTimeout.C
-                c.tryOpen()
-            }()
-
+            c.reconnectTimeout = scheduleFuncAfterMillis(c.tryOpen, delayTimeMillis)
             c.reconnectionAttempt++
         }
     } else {

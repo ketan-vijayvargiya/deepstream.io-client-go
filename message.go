@@ -6,7 +6,8 @@ const (
 )
 
 type Message struct {
-    Topic  Topic
-    Action Action
-    Data   []string
+    Topic   Topic
+    Action  Action
+    Data    []string
+    raw     string
 }

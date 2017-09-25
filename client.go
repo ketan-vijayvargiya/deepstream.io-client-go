@@ -5,30 +5,32 @@ func NewClient(url string, clientConfig *ClientConfig) *Client {
     var clonedClientConfig  = clientConfig.cloneWithDefaults()
 
     var client = &Client{
-        url                 : url,
-        clientConfig        : clonedClientConfig,
+        url                         : url,
+        clientConfig                : clonedClientConfig,
     }
-    client.connection       = newConnection(url, clonedClientConfig, client)
+    client.connection               = newConnection(url, clonedClientConfig, client)
+    client.utilAckTimeoutRegistry   = newUtilAckTimeoutRegistry(client)
 
-    client.EventHandler     = newEventHandler(client, clonedClientConfig)
-    client.RpcHandler       = newRpcHandler(client, clonedClientConfig)
-    client.RecordHandler    = newRecordHandler(client, clonedClientConfig)
-    client.PresenceHandler  = newPresenceHandler(client, clonedClientConfig)
+    client.EventHandler             = newEventHandler(client, clonedClientConfig)
+    client.RpcHandler               = newRpcHandler(client, clonedClientConfig)
+    client.RecordHandler            = newRecordHandler(client, clonedClientConfig)
+    client.PresenceHandler          = newPresenceHandler(client, clonedClientConfig)
 
     return client
 }
 
 type Client struct {
-    url                 string
-    clientConfig        *ClientConfig
-    connection          *connection
+    url                     string
+    clientConfig            *ClientConfig
+    connection              *connection
+    utilAckTimeoutRegistry  *utilAckTimeoutRegistry
 
-    RuntimeErrorHandler func (topic Topic, event Event, errorMessage string)
+    RuntimeErrorHandler     func (topic Topic, event Event, errorMessage string)
 
-    EventHandler        *EventHandler
-    RpcHandler          *RpcHandler
-    RecordHandler       *RecordHandler
-    PresenceHandler     *PresenceHandler
+    EventHandler            *EventHandler
+    RpcHandler              *RpcHandler
+    RecordHandler           *RecordHandler
+    PresenceHandler         *PresenceHandler
 }
 
 func (c *Client) Login(authParams string) *LoginResult {
