@@ -62,7 +62,7 @@ func (e *EventHandler) Emit(eventName string, data interface{}) {
     e.broadcastEvent(eventName, data)
 }
 
-func (e *EventHandler) Listen(pattern string, listenListener *ListenListener) {
+func (e *EventHandler) Listen(pattern string, listenListener ListenListener) {
     if e.listeners[pattern] != nil {
         e.client.onError(Topic_Event, Event_ListenerExists, pattern)
     } else {
