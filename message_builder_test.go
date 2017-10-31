@@ -12,11 +12,6 @@ type testStruct struct {
     c   string
 }
 
-type Response1 struct {
-    Page   int
-    Fruits []string
-}
-
 func TestMessageToStringNil(t *testing.T) {
     var expected = testMessagePrefix + messageRecordSeparator
 
